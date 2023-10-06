@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jayzhu.easypan.mapper.UserInfoMapper">
+    <insert id="insert">
+        insert into user_info(user_id,
+                              nick_name,
+                              email,
+                              qq_open_id,
+                              qq_avatar, password, join_time, last_login_time,
+                              status, use_space, total_space)
+        values (#{userId},#{nickName},#{email},#{qqOpenId},#{qqAvatar},#{password},#{joinTime},#{lastLoginTime},#{status},#{useSpace},#{totalSpace})
+    </insert>
+    <update id="updateByUserId">
+        update user_info
+        set nick_name=#{userInfo.nickName},
+            email=#{userInfo.email},
+            qq_open_id=#{userInfo.qqOpenId},
+            qq_avatar=#{userInfo.qqAvatar},
+            password=#{userInfo.password},
+            join_time=#{userInfo.joinTime},
+            last_login_time=#{userInfo.lastLoginTime},
+            status=#{userInfo.status},
+            use_space=#{userInfo.useSpace},
+            total_space=#{userInfo.totalSpace}
+        where user_id = #{userId};
+    </update>
+    <select id="selectByEmail" resultType="com.jayzhu.easypan.entity.po.UserInfo">
+        select user_id,
+               nick_name,
+               email,
+               qq_open_id,
+               qq_avatar,
+               password,
+               join_time,
+               last_login_time,
+               status,
+               use_space,
+               total_space
+        from user_info
+        where email = #{email};
+    </select>
+    <select id="selectByNickName" resultType="com.jayzhu.easypan.entity.po.UserInfo">
+        select user_id,
+               nick_name,
+               email,
+               qq_open_id,
+               qq_avatar,
+               password,
+               join_time,
+               last_login_time,
+               status,
+               use_space,
+               total_space
+        from user_info
+        where nick_name = #{nickName}
+    </select>
+</mapper>

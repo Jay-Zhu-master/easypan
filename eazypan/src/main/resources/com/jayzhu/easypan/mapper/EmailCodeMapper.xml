@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jayzhu.easypan.mapper.EmailCodeMapper">
+    <insert id="insert">
+        insert into email_code(email, code, create_time, status)
+        values (#{email}, #{code}, #{createTime}, #{status})
+    </insert>
+    <update id="disableEmailCode">
+        update email_code t
+        set t.status = 1
+        where t.email = #{email}
+          and t.status = 0
+    </update>
+    <select id="selectByEmailAndCode" resultType="com.jayzhu.easypan.entity.po.EmailCode">
+        select email, code, create_time, status
+        from email_code
+        where code = #{code}
+          and email = #{email}
+    </select>
+</mapper>
