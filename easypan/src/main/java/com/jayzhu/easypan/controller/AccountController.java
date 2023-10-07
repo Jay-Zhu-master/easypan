@@ -20,13 +20,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 @RestController("userInfoController")
 @Slf4j
@@ -81,7 +78,7 @@ public class AccountController {
      * @return
      */
     @RequestMapping("/sendEmailCode")
-    @GlobalInterceptor(checkParams = true)
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
     public ResponseVO sendEmailCode(HttpSession session,
                                     @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL, max = 150) String email,
                                     @VerifyParam(required = true) String checkCode,
@@ -112,7 +109,7 @@ public class AccountController {
      * @return
      */
     @RequestMapping("/register")
-    @GlobalInterceptor(checkParams = true)
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
     public ResponseVO register(HttpSession session,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL, max = 150) String email,
                                @VerifyParam(required = true) String nickName,
@@ -143,7 +140,7 @@ public class AccountController {
      * @date: 2023/10/7 10:28
      */
     @RequestMapping("/login")
-    @GlobalInterceptor(checkParams = true)
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
     public ResponseVO login(HttpSession session,
                             @VerifyParam(required = true) String email,
                             @VerifyParam(required = true) String password,
@@ -174,7 +171,7 @@ public class AccountController {
      * @date: 2023/10/7 10:54
      */
     @RequestMapping("/resetPwd")
-    @GlobalInterceptor(checkParams = true)
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
     public ResponseVO resetPwd(HttpSession session,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL, max = 150) String email,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.PASSWORD, min = 8, max = 18) String password,
@@ -194,7 +191,7 @@ public class AccountController {
     }
 
     @RequestMapping("/getAvatar/{userId}")
-    @GlobalInterceptor(checkParams = true)
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
     public void getAvatar(HttpServletResponse response, @PathVariable(value = "userId") String userId) {
         String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;
         File folder = new File(appConfig.getProjectFolder() + avatarFolderName);
@@ -214,11 +211,13 @@ public class AccountController {
     }
 
     @RequestMapping("/getUserInfo")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO getUserInfo(HttpSession session) {
         return ResponseVO.success(userInfoService.getUserInfoFromSession(session));
     }
 
     @RequestMapping("/getUseSpace")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO getUseSpace(HttpSession session) {
         SessionWebUserDto sessionWebUserDto = userInfoService.getUserInfoFromSession(session);
         //TODO 查询当前用户上传文件大小总和
@@ -233,6 +232,7 @@ public class AccountController {
     }
 
     @PostMapping("/updateUserAvatar")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO updateUserAvatar(HttpSession session, @RequestParam("avatar") MultipartFile avatar) throws IOException {
         SessionWebUserDto sessionWebUserDto = userInfoService.getUserInfoFromSession(session);
         String baseFolder = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE;

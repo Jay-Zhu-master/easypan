@@ -24,7 +24,7 @@ public class ResponseVO {
     }
 
     //失败响应
-    public static ResponseVO error(String msg) {
-        return new ResponseVO(400, msg, "失败", null);
+    public static ResponseVO error(Integer code, String msg) {
+        return new ResponseVO(code, msg, "失败", null);
     }
 }

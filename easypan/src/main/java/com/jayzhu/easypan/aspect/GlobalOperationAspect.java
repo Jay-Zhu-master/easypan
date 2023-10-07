@@ -2,9 +2,14 @@ package com.jayzhu.easypan.aspect;
 
 import com.jayzhu.easypan.annotation.GlobalInterceptor;
 import com.jayzhu.easypan.annotation.VerifyParam;
+import com.jayzhu.easypan.entity.constats.Constants;
+import com.jayzhu.easypan.entity.dto.SessionWebUserDto;
+import com.jayzhu.easypan.enums.ResponseCodeEnum;
 import com.jayzhu.easypan.exception.BusinessException;
 import com.jayzhu.easypan.utils.StringTools;
 import com.jayzhu.easypan.utils.VerifyUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,6 +17,9 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -50,15 +58,33 @@ public class GlobalOperationAspect {
             if (interceptor.checkParams()) {
                 validateParams(method, args);
             }
+            /*
+            校验登陆
+             */
+            if (interceptor.checkLogin() || interceptor.checkAdmin()) {
+                checkLogin(interceptor.checkAdmin());
+            }
         } catch (BusinessException e) {
             log.error("全局拦截异常", e);
             throw e;
         } catch (Exception e) {
             log.error("全局拦截异常", e);
-            throw new BusinessException("500");
+            throw new BusinessException(ResponseCodeEnum.CODE_500);
         } catch (Throwable e) {
             log.error("全局拦截异常", e);
-            throw new BusinessException("500");
+            throw new BusinessException(ResponseCodeEnum.CODE_500);
+        }
+    }
+
+    private void checkLogin(boolean checkAdmin) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpSession session = request.getSession();
+        SessionWebUserDto sessionWebUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
+        if (sessionWebUserDto == null) {
+            throw new BusinessException(ResponseCodeEnum.CODE_901);
+        }
+        if (checkAdmin && !sessionWebUserDto.getAdmin()) {
+            throw new BusinessException(ResponseCodeEnum.CODE_404);
         }
     }
 
@@ -100,7 +126,7 @@ public class GlobalOperationAspect {
             throw e;
         } catch (Exception e) {
             log.error("校验参数失败", e);
-            throw new BusinessException("600");
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
     }
 
@@ -111,7 +137,7 @@ public class GlobalOperationAspect {
         校验空
          */
         if (isEmpty && verifyParam.required()) {
-            throw new BusinessException("600");
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
 
         /*
@@ -120,16 +146,15 @@ public class GlobalOperationAspect {
         if (!isEmpty &&
                 (verifyParam.max() != -1 && verifyParam.max() < length ||
                         verifyParam.min() != -1 && verifyParam.min() > length)) {
-            throw new BusinessException("600");
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
         /*
         校验正则
          */
 
-        if(!isEmpty && !StringTools.isEmpty(verifyParam.regex().getRegex()) && !VerifyUtils.verify(verifyParam.regex(),String.valueOf(value))){
-            throw new BusinessException("600");
+        if (!isEmpty && !StringTools.isEmpty(verifyParam.regex().getRegex()) && !VerifyUtils.verify(verifyParam.regex(), String.valueOf(value))) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
     }
-
 
 }
