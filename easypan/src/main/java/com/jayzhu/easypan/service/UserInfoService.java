@@ -13,4 +13,6 @@ public interface UserInfoService {
 
     SessionWebUserDto getUserInfoFromSession(HttpSession session);
     void updateUserInfoByUserId(UserInfo userInfo, String userId);
+
+    SessionWebUserDto qqlogin(String code);
 }

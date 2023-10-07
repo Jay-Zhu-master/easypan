@@ -22,8 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController("userInfoController")
 @Slf4j
@@ -263,5 +269,30 @@ public class AccountController {
         userInfo.setPassword(StringTools.encodeByMd5(password));
         userInfoService.updateUserInfoByUserId(userInfo, sessionWebUserDto.getUserId());
         return ResponseVO.success();
+    }
+
+
+    @PostMapping("/qqlogin")
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    public ResponseVO qqlogin(HttpSession session, String callbackUrl) throws UnsupportedEncodingException {
+        String state = StringTools.getRandomNumber(Constants.LENGTH_30);
+        if (!StringTools.isEmpty(callbackUrl)) {
+            session.setAttribute(state, callbackUrl);
+        }
+        String url = String.format(appConfig.getQqUrlAuthorization(), appConfig.getQqAppId(), URLEncoder.encode(appConfig.getQqUrlRedirect(), StandardCharsets.UTF_8), state);
+        return ResponseVO.success(url);
+    }
+
+    @PostMapping("/qqlogin/callback")
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    public ResponseVO qqloginCallback(HttpSession session, @VerifyParam(required = true) String code, @VerifyParam(required = true) String state) {
+        SessionWebUserDto sessionWebUserDto = userInfoService.qqlogin(code);
+
+        session.setAttribute(Constants.SESSION_KEY,sessionWebUserDto);
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("callbackUrl", session.getAttribute(state));
+        result.put("userInfo", sessionWebUserDto);
+        return ResponseVO.success(result);
     }
 }

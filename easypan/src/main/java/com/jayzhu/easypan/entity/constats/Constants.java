@@ -18,4 +18,5 @@ public class Constants {
     public static final String AVATAR_SUFFIX = ".jpg";
 
     public static final String AVATAR_DEFAULT = "default_avatar.jpg";
+    public static final Integer LENGTH_30 = 30;
 }

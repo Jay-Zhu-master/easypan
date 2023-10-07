@@ -7,12 +7,52 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
     @Value("${spring.mail.username}")
     private String sendUsername;
-
     @Value("${admin.emails}")
     private String adminEmails;
-
     @Value("${project.folder}")
     private String projectFolder;
+    @Value("${qq.url.authorization}")
+    private String qqUrlAuthorization;
+    @Value("${qq.app.id}")
+    private String qqAppId;
+    @Value("${qq.app.key}")
+    private String qqAppKey;
+    @Value("${qq.url.access.token}")
+    private String qqUrlAccessToken;
+    @Value("${qq.url.openid}")
+    private String qqUrlOpenId;
+    @Value("${qq.url.user.info}")
+    private String qqUrlUserInfo;
+    @Value("${qq.url.redirect}")
+    private String qqUrlRedirect;
+
+    public String getQqAppId() {
+        return qqAppId;
+    }
+
+    public String getQqAppKey() {
+        return qqAppKey;
+    }
+
+    public String getQqUrlAccessToken() {
+        return qqUrlAccessToken;
+    }
+
+    public String getQqUrlOpenId() {
+        return qqUrlOpenId;
+    }
+
+    public String getQqUrlUserInfo() {
+        return qqUrlUserInfo;
+    }
+
+    public String getQqUrlRedirect() {
+        return qqUrlRedirect;
+    }
+
+    public String getQqUrlAuthorization() {
+        return qqUrlAuthorization;
+    }
 
     public String getProjectFolder() {
         return projectFolder;

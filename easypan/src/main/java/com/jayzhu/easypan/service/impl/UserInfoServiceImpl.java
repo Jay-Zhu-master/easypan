@@ -112,4 +112,9 @@ public class UserInfoServiceImpl implements UserInfoService {
     public void updateUserInfoByUserId(UserInfo userInfo, String userId) {
         userInfoMapper.updateByUserId(userInfo, userId);
     }
+
+    @Override
+    public SessionWebUserDto qqlogin(String code) {
+        return null;
+    }
 }
