@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jayzhu.easypan.mapper.UserInfoMapper">
+    <insert id="insert">
+        insert into user_info(user_id,
+                              nick_name,
+                              email,
+                              qq_open_id,
+                              qq_avatar, password, join_time, last_login_time,
+                              status, use_space, total_space)
+        values (#{userId},#{nickName},#{email},#{qqOpenId},#{qqAvatar},#{password},#{joinTime},#{lastLoginTime},#{status},#{useSpace},#{totalSpace})
+    </insert>
+    <update id="updateByUserId">
+        update user_info
+        <set>
+            <if test="userInfo.nickName != null and userInfo.nickName != ''">
+                nick_name=#{userInfo.nickName},
+            </if>
+            <if test="userInfo.email != null and userInfo.email != ''">
+                email=#{userInfo.email},
+            </if>
+            <if test="userInfo.qqOpenId != null and userInfo.qqOpenId != ''">
+                qq_open_id=#{userInfo.qqOpenId},
+            </if>
+            <if test="userInfo.qqAvatar != null">
+                qq_avatar=#{userInfo.qqAvatar},
+            </if>
+            <if test="userInfo.password != null and userInfo.password != ''">
+                password=#{userInfo.password},
+            </if>
+            <if test="userInfo.joinTime != null">
+                join_time=#{userInfo.joinTime},
+            </if>
+            <if test="userInfo.lastLoginTime != null">
+                last_login_time=#{userInfo.lastLoginTime},
+            </if>
+            <if test="userInfo.status != null">
+                status=#{userInfo.status},
+            </if>
+            <if test="userInfo.useSpace != null">
+                use_space=#{userInfo.useSpace},
+            </if>
+            <if test="userInfo.totalSpace != null">
+                total_space=#{userInfo.totalSpace}
+            </if>
+        </set>
+        where user_id = #{userId};
+    </update>
+    <select id="selectByEmail" resultType="com.jayzhu.easypan.entity.po.UserInfo">
+        select user_id,
+               nick_name,
+               email,
+               qq_open_id,
+               qq_avatar,
+               password,
+               join_time,
+               last_login_time,
+               status,
+               use_space,
+               total_space
+        from user_info
+        where email = #{email};
+    </select>
+    <select id="selectByNickName" resultType="com.jayzhu.easypan.entity.po.UserInfo">
+        select user_id,
+               nick_name,
+               email,
+               qq_open_id,
+               qq_avatar,
+               password,
+               join_time,
+               last_login_time,
+               status,
+               use_space,
+               total_space
+        from user_info
+        where nick_name = #{nickName}
+    </select>
+</mapper>
