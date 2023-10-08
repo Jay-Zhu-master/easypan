@@ -1,6 +1,19 @@
 package com.jayzhu.easypan.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import com.jayzhu.easypan.annotation.GlobalInterceptor;
+import com.jayzhu.easypan.annotation.VerifyParam;
+import com.jayzhu.easypan.entity.constats.Constants;
+import com.jayzhu.easypan.entity.dto.SessionWebUserDto;
+import com.jayzhu.easypan.entity.dto.UploadResultDto;
+import com.jayzhu.easypan.entity.query.FileInfoQuery;
+import com.jayzhu.easypan.entity.vo.ResponseVO;
+import com.jayzhu.easypan.enums.FileCategoryEnum;
+import com.jayzhu.easypan.enums.FileDelFlagEnum;
+import com.jayzhu.easypan.service.FileInfoService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -11,6 +24,38 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2023-10-07
  */
 @RestController
+@RequestMapping("/file")
 public class FileInfoController {
 
+    @Autowired
+    FileInfoService fileInfoService;
+
+    @PostMapping("/loadDataList")
+    @GlobalInterceptor
+    public ResponseVO loadDataList(HttpSession session, FileInfoQuery query) {
+        FileCategoryEnum categoryEnum = FileCategoryEnum.getByCode(query.getCategory());
+        if (categoryEnum != null) {
+            query.setCategory(String.valueOf(categoryEnum.getCategory()));
+        }
+        query.setUserId(((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY)).getUserId());
+        query.setOrderBy("last_update_time desc");
+        query.setDelFlag(FileDelFlagEnum.USING.getFlag());
+        return ResponseVO.success(fileInfoService.findListByPage(query));
+    }
+
+    @PostMapping("/uploadFile")
+    @GlobalInterceptor(checkParams = true)
+    public ResponseVO uploadFile(HttpSession session,
+                                 String fileId,
+                                 MultipartFile file,
+                                 @VerifyParam(required = true) String fileName,
+                                 @VerifyParam(required = true) String filePid,
+                                 @VerifyParam(required = true) String fileMd5,
+                                 @VerifyParam(required = true) Integer chunkIndex,
+                                 @VerifyParam(required = true) Integer chunks
+                                 ) {
+        SessionWebUserDto webUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
+        UploadResultDto resultDto = fileInfoService.uploadFile(webUserDto, fileId, file, fileName, filePid, fileMd5, chunkIndex, chunks);
+        return ResponseVO.success();
+    }
 }

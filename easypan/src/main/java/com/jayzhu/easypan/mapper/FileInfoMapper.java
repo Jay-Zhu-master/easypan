@@ -1,7 +1,11 @@
 package com.jayzhu.easypan.mapper;
 
+import com.jayzhu.easypan.entity.query.FileInfoQuery;
+import com.jayzhu.easypan.entity.vo.FileInfoVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,4 +20,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FileInfoMapper {
 
+    List<FileInfoVo> selectByQuery(FileInfoQuery query);
 }
