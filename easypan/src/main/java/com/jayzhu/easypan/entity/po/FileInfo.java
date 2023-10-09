@@ -87,7 +87,7 @@ public class FileInfo implements Serializable {
     /**
      * 0：转码中 1：转码失败 2：转码成功
      */
-    private Boolean status;
+    private Integer status;
 
     /**
      * 进入回收站时间
@@ -97,7 +97,7 @@ public class FileInfo implements Serializable {
     /**
      * 0：删除 1：回收站 2：正常
      */
-    private Boolean delFlag;
+    private Integer delFlag;
 
     public String getFileId() {
         return fileId;
@@ -203,11 +203,11 @@ public class FileInfo implements Serializable {
         this.fileType = fileType;
     }
 
-    public Boolean getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
@@ -219,11 +219,11 @@ public class FileInfo implements Serializable {
         this.recoveryTime = recoveryTime;
     }
 
-    public Boolean getDelFlag() {
+    public Integer getDelFlag() {
         return delFlag;
     }
 
-    public void setDelFlag(Boolean delFlag) {
+    public void setDelFlag(Integer delFlag) {
         this.delFlag = delFlag;
     }
 

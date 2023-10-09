@@ -1,4 +1,4 @@
-package com.jayzhu.easypan.enums;
+package com.jayzhu.easypan.entity.enums;
 
 public enum VerifyRegexEnum {
     NO("", "不校验"),

@@ -1,6 +1,4 @@
-package com.jayzhu.easypan.enums;
-
-import org.apache.ibatis.annotations.Param;
+package com.jayzhu.easypan.entity.enums;
 
 /**
  * @author jayzhu
@@ -8,7 +6,6 @@ import org.apache.ibatis.annotations.Param;
  * @createDate 2023年10月08日 10:00:28
  * @packageName com.jayzhu.easypan.enums
  * @className FileCategoryEnum
- * @describe TODO
  */
 public enum FileCategoryEnum {
     ALL(0,"all","全部"),

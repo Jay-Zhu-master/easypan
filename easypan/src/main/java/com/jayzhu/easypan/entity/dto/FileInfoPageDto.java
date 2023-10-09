@@ -13,7 +13,6 @@ import java.util.List;
  * @createDate 2023年10月08日 15:52:49
  * @packageName com.jayzhu.easypan.entity.dto
  * @className FileInfoPageBean
- * @describe TODO
  */
 
 @Data

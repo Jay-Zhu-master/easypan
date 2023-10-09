@@ -1,6 +1,6 @@
 package com.jayzhu.easypan.exception;
 
-import com.jayzhu.easypan.enums.ResponseCodeEnum;
+import com.jayzhu.easypan.entity.enums.ResponseCodeEnum;
 
 public class BusinessException extends RuntimeException {
     private Integer code;

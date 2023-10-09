@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
  * @createDate 2023年10月08日 10:11:56
  * @packageName com.jayzhu.easypan.entity.dto
  * @className FileInfoPageDto
- * @describe TODO
  */
 
 @Data

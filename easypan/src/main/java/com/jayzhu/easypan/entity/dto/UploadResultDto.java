@@ -10,7 +10,6 @@ import java.io.Serializable;
  * @createDate 2023年10月08日 17:11:22
  * @packageName com.jayzhu.easypan.entity.dto
  * @className UploadResultDto
- * @describe TODO
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UploadResultDto implements Serializable {

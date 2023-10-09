@@ -1,7 +1,7 @@
 package com.jayzhu.easypan.annotation;
 
 
-import com.jayzhu.easypan.enums.VerifyRegexEnum;
+import com.jayzhu.easypan.entity.enums.VerifyRegexEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

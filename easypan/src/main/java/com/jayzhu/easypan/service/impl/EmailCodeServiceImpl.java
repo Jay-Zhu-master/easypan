@@ -53,11 +53,7 @@ public class EmailCodeServiceImpl implements EmailCodeService {
             }
         }
         String code = StringTools.getRandomNumber(Constants.LENGTH_5);
-
-        //TODO 发送验证码
-
         sendEmailCode(email, code);
-
         emailCodeMapper.disableEmailCode(email);
         EmailCode emailCode = new EmailCode();
         emailCode.setCode(code);

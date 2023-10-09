@@ -10,7 +10,7 @@ import com.jayzhu.easypan.entity.dto.SessionWebUserDto;
 import com.jayzhu.easypan.entity.dto.UserSpaceDto;
 import com.jayzhu.easypan.entity.po.UserInfo;
 import com.jayzhu.easypan.entity.vo.ResponseVO;
-import com.jayzhu.easypan.enums.VerifyRegexEnum;
+import com.jayzhu.easypan.entity.enums.VerifyRegexEnum;
 import com.jayzhu.easypan.exception.BusinessException;
 import com.jayzhu.easypan.service.EmailCodeService;
 import com.jayzhu.easypan.service.UserInfoService;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 @RestController("userInfoController")
 @Slf4j
-public class AccountController {
+public class AccountController extends ABaseController{
 
 
     @Autowired
@@ -226,7 +226,6 @@ public class AccountController {
     @GlobalInterceptor(checkParams = true)
     public ResponseVO getUseSpace(HttpSession session) {
         SessionWebUserDto sessionWebUserDto = userInfoService.getUserInfoFromSession(session);
-        //TODO 查询当前用户上传文件大小总和
         UserSpaceDto spaceDto = redisComponent.getUserSpaceUse(sessionWebUserDto.getUserId());
         return ResponseVO.success(spaceDto);
     }

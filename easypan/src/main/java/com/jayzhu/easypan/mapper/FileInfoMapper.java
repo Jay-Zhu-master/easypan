@@ -1,24 +1,29 @@
 package com.jayzhu.easypan.mapper;
 
-import com.jayzhu.easypan.entity.query.FileInfoQuery;
-import com.jayzhu.easypan.entity.vo.FileInfoVo;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
- * <p>
- * 文件信息表 Mapper 接口
- * </p>
- *
- * @author jayzhu
- * @since 2023-10-07
+ * 文件信息 数据库操作接口
  */
+public interface FileInfoMapper<T,P> extends BaseMapper<T,P> {
 
-@Mapper
-@Repository
-public interface FileInfoMapper {
+	/**
+	 * 根据FileIdAndUserId更新
+	 */
+	 Integer updateByFileIdAndUserId(@Param("bean") T t,@Param("fileId") String fileId,@Param("userId") String userId);
 
-    List<FileInfoVo> selectByQuery(FileInfoQuery query);
+
+	/**
+	 * 根据FileIdAndUserId删除
+	 */
+	 Integer deleteByFileIdAndUserId(@Param("fileId") String fileId,@Param("userId") String userId);
+
+
+	/**
+	 * 根据FileIdAndUserId获取对象
+	 */
+	 T selectByFileIdAndUserId(@Param("fileId") String fileId,@Param("userId") String userId);
+
+
+    Long selectUseSpace(String userId);
 }

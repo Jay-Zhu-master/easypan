@@ -1,4 +1,4 @@
-package com.jayzhu.easypan.component;
+package com.jayzhu.easypan.utils;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

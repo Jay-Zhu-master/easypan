@@ -7,15 +7,15 @@ import com.jayzhu.easypan.entity.dto.SessionWebUserDto;
 import com.jayzhu.easypan.entity.dto.SysSettingDto;
 import com.jayzhu.easypan.entity.dto.UserSpaceDto;
 import com.jayzhu.easypan.entity.po.UserInfo;
-import com.jayzhu.easypan.enums.UserStatusEnum;
+import com.jayzhu.easypan.entity.enums.UserStatusEnum;
 import com.jayzhu.easypan.exception.BusinessException;
+import com.jayzhu.easypan.mapper.FileInfoMapper;
 import com.jayzhu.easypan.mapper.UserInfoMapper;
 import com.jayzhu.easypan.service.EmailCodeService;
 import com.jayzhu.easypan.service.UserInfoService;
 import com.jayzhu.easypan.utils.StringTools;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.ibatis.reflection.ArrayUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +34,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Autowired
     private RedisComponent redisComponent;
 
+    @Autowired
+    private FileInfoMapper fileInfoMapper;
     @Autowired
     AppConfig appConfig;
 
@@ -84,9 +86,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             sessionWebUserDto.setAdmin(false);
         }
         UserSpaceDto userSpaceDto = new UserSpaceDto();
-        //TODO 查询当前用户上传文件大小总和
-
-         userSpaceDto.setUseSpace(0L);
+        userSpaceDto.setUseSpace(fileInfoMapper.selectUseSpace(userInfo.getUserId()));
         userSpaceDto.setTotalSpace(userInfo.getTotalSpace());
         redisComponent.saveUserSpaceUse(userInfo.getUserId(), userSpaceDto);
         return sessionWebUserDto;

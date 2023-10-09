@@ -5,12 +5,13 @@
 <mapper namespace="com.jayzhu.easypan.mapper.UserInfoMapper">
     <insert id="insert">
         insert into user_info(user_id,
-                              nick_name,
-                              email,
-                              qq_open_id,
-                              qq_avatar, password, join_time, last_login_time,
-                              status, use_space, total_space)
-        values (#{userId},#{nickName},#{email},#{qqOpenId},#{qqAvatar},#{password},#{joinTime},#{lastLoginTime},#{status},#{useSpace},#{totalSpace})
+        nick_name,
+        email,
+        qq_open_id,
+        qq_avatar, password, join_time, last_login_time,
+        status, use_space, total_space)
+        values
+        (#{userId},#{nickName},#{email},#{qqOpenId},#{qqAvatar},#{password},#{joinTime},#{lastLoginTime},#{status},#{useSpace},#{totalSpace})
     </insert>
     <update id="updateByUserId">
         update user_info
@@ -47,6 +48,24 @@
             </if>
         </set>
         where user_id = #{userId};
+    </update>
+    <update id="updateUseSpace">
+        update user_info
+        <set>
+            <if test="useSpace != null">
+                use_space = use_space + #{useSpace},
+            </if>
+            <if test="totalSpace != null">
+                total_space = total_space + #{totalSpace},
+            </if>
+            where user_id = #{userId}
+            <if test="useSpace != null"><![CDATA[
+                and (use_space+#{useSpace}) <= total_space
+            ]]></if>
+            <if test="totalSpace != null">
+                and total_space + #{totalSpace} >= use_space
+            </if>
+        </set>
     </update>
     <select id="selectByEmail" resultType="com.jayzhu.easypan.entity.po.UserInfo">
         select user_id,

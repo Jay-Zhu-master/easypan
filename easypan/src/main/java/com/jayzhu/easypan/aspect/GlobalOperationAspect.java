@@ -4,7 +4,7 @@ import com.jayzhu.easypan.annotation.GlobalInterceptor;
 import com.jayzhu.easypan.annotation.VerifyParam;
 import com.jayzhu.easypan.entity.constats.Constants;
 import com.jayzhu.easypan.entity.dto.SessionWebUserDto;
-import com.jayzhu.easypan.enums.ResponseCodeEnum;
+import com.jayzhu.easypan.entity.enums.ResponseCodeEnum;
 import com.jayzhu.easypan.exception.BusinessException;
 import com.jayzhu.easypan.utils.StringTools;
 import com.jayzhu.easypan.utils.VerifyUtils;
@@ -19,12 +19,10 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 
 @Aspect
 @Component

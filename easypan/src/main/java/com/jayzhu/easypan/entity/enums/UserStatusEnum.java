@@ -1,4 +1,4 @@
-package com.jayzhu.easypan.enums;
+package com.jayzhu.easypan.entity.enums;
 
 public enum UserStatusEnum {
     DISABLE(0, "禁用"),

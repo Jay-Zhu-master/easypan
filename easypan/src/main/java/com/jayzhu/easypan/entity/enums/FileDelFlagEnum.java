@@ -1,4 +1,4 @@
-package com.jayzhu.easypan.enums;
+package com.jayzhu.easypan.entity.enums;
 
 /**
  * @author jayzhu
@@ -6,7 +6,6 @@ package com.jayzhu.easypan.enums;
  * @createDate 2023年10月08日 10:20:22
  * @packageName com.jayzhu.easypan.enums
  * @className FileDelFlagEnums
- * @describe TODO
  */
 public enum FileDelFlagEnum {
     DEL(0, "删除"),
