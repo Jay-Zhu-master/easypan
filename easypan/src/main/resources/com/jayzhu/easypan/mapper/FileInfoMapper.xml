@@ -417,6 +417,33 @@
         </set>
         where file_id=#{fileId} and user_id=#{userId}
     </update>
+    <update id="updateFileStatusWithOldStatus">
+        UPDATE file_info
+        <set>
+            <if test="bean.fileMd5 != null">
+                file_md5 = #{bean.fileMd5},
+            </if>
+            <if test="bean.filePid != null">
+                file_pid = #{bean.filePid},
+            </if>
+            <if test="bean.fileSize != null">
+                file_size = #{bean.fileSize},
+            </if>
+            <if test="bean.fileName != null">
+                file_name = #{bean.fileName},
+            </if>
+            <if test="bean.createTime != null">
+                create_time = #{bean.createTime},
+            </if>
+            <if test="bean.lastUpdateTime != null">
+                last_update_time = #{bean.lastUpdateTime},
+            </if>
+            <if test="bean.folderType != null">
+                folder_type = #{bean.folderType},
+            </if>
+        </set>
+        where file_id=#{fileId} and user_id=#{userId} and status = #{oldStatus}
+    </update>
 
     <!-- 根据FileIdAndUserId删除-->
     <delete id="deleteByFileIdAndUserId">

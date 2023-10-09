@@ -80,4 +80,6 @@ public interface FileInfoService {
      */
     Integer deleteFileInfoByFileIdAndUserId(String fileId,String userId);
 
+
+    public void transferFile(String fileId, SessionWebUserDto webUserDto);
 }

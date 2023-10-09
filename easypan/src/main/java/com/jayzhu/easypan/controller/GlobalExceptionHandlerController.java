@@ -15,7 +15,7 @@ import java.net.BindException;
 
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandlerController {
+public class GlobalExceptionHandlerController extends ABaseController {
     @ExceptionHandler(value = Exception.class)
     Object handleException(Exception e, HttpServletRequest request) {
         log.error("请求错误，请求地址{},错误信息:", request.getRequestURL(), e);

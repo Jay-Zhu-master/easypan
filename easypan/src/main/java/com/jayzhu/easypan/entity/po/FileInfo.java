@@ -58,31 +58,35 @@ public class FileInfo implements Serializable {
     /**
      * 创建时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /**
      * 最后更新时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastUpdateTime;
+
+    public void setFolderType(Integer folderType) {
+        this.folderType = folderType;
+    }
 
     /**
      * 0：文件 1：目录
      */
-    private Boolean folderType;
+    private Integer folderType;
 
     /**
      * 文件分类：1：视频 2：阴平 3：图片 4：文档 5：其他
      */
-    private Boolean fileCategory;
+    private Integer fileCategory;
 
     /**
      * 1：视频 2：音频 3：图片 4：pdf 5：doc 6：excel 7：txt 8：code 9：zip 10：其他
      */
-    private Boolean fileType;
+    private Integer fileType;
 
     /**
      * 0：转码中 1：转码失败 2：转码成功
@@ -178,29 +182,22 @@ public class FileInfo implements Serializable {
     public void setLastUpdateTime(LocalDateTime lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
+    public Integer getFileCategory() {
+        return fileCategory;
+    }
+    public void setFileCategory(Integer fileCategory) {
+        this.fileCategory = fileCategory;
+    }
+    public void setFileType(Integer fileType) {
+        this.fileType = fileType;
+    }
 
-    public Boolean getFolderType() {
+    public Integer getFolderType() {
         return folderType;
     }
 
-    public void setFolderType(Boolean folderType) {
-        this.folderType = folderType;
-    }
-
-    public Boolean getFileCategory() {
-        return fileCategory;
-    }
-
-    public void setFileCategory(Boolean fileCategory) {
-        this.fileCategory = fileCategory;
-    }
-
-    public Boolean getFileType() {
+    public Integer getFileType() {
         return fileType;
-    }
-
-    public void setFileType(Boolean fileType) {
-        this.fileType = fileType;
     }
 
     public Integer getStatus() {
