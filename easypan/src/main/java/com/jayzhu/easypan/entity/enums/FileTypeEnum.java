@@ -46,7 +46,7 @@ public enum FileTypeEnum {
                 return item;
             }
         }
-        return null;
+        return FileTypeEnum.OTHERS;
     }
 
     public FileCategoryEnum getCategory() {

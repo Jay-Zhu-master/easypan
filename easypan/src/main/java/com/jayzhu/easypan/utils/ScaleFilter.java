@@ -20,8 +20,8 @@ import java.io.File;
 public class ScaleFilter {
     public static void createCover4Video(File sourceFile, Integer width, File targetFile) {
         try {
-            String cmd = "ffmpeg -i %s -y -vframes 1 -vf scale=%d/%d/a %s";
-            ProcessUtils.executeCommand(String.format(cmd, width, width, targetFile.getAbsoluteFile()), false);
+            String cmd = "ffmpeg -i %s -y -vframes 1 -vf scale=%d/%d %s";
+            ProcessUtils.executeCommand(String.format(cmd, sourceFile.getAbsolutePath(), width, width, targetFile.getAbsoluteFile()), false);
         } catch (Exception e) {
             log.error("生成视频封面失败", e);
         }
