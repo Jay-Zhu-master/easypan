@@ -16,9 +16,14 @@ import com.jayzhu.easypan.mapper.FileInfoMapper;
 import com.jayzhu.easypan.mapper.UserInfoMapper;
 import com.jayzhu.easypan.service.FileInfoService;
 import com.jayzhu.easypan.utils.DateUtils;
+import com.jayzhu.easypan.utils.ProcessUtils;
+import com.jayzhu.easypan.utils.ScaleFilter;
 import com.jayzhu.easypan.utils.StringTools;
+import io.netty.util.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.tomcat.util.bcel.Const;
+import org.aspectj.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -239,7 +244,7 @@ public class FileInfoServiceImpl implements FileInfoService {
             if (!tempFileFolder.exists()) {
                 tempFileFolder.mkdirs();
             }
-            File newFile = new File(tempFileFolder.getParent() + "/" + chunkIndex);
+            File newFile = new File(tempFileFolder.getPath() + "/" + chunkIndex);
             file.transferTo(newFile);
             if (chunkIndex < chunks - 1) {
                 resultDto.setStatus(UploadStatusEnum.UPLOADING.getCode());
@@ -248,6 +253,7 @@ public class FileInfoServiceImpl implements FileInfoService {
                 return resultDto;
             }
             // 最后一个分片上传完成，记录数据库，异步合并分片
+            redisComponent.saveFileTempSize(webUserDto.getUserId(), fileId, file.getSize());
             String month = DateUtils.format(LocalDateTime.now(), DateTimePatternEnum.YYYYMM.getPattern());
             String fileSuffix = StringTools.getFileSuffix(fileName);
             // 真实文件名
@@ -258,6 +264,7 @@ public class FileInfoServiceImpl implements FileInfoService {
             FileInfo fileInfo = new FileInfo();
             fileInfo.setFileId(fileId);
             fileInfo.setUserId(webUserDto.getUserId());
+            fileInfo.setFileName(fileName);
             fileInfo.setFileMd5(fileMd5);
             fileInfo.setFilePath(month + "/" + realFileName);
             fileInfo.setFilePid(filePid);
@@ -327,8 +334,8 @@ public class FileInfoServiceImpl implements FileInfoService {
     /**
      * 私有方法，更新使用空间
      *
-     * @param webUserDto
-     * @param useSpace
+     * @param webUserDto session中的用户信息
+     * @param useSpace   使用空间
      */
     private void updateUseSpace(SessionWebUserDto webUserDto, Long useSpace) {
         Integer count = userInfoMapper.updateUseSpace(webUserDto.getUserId(), useSpace, null);
@@ -340,8 +347,14 @@ public class FileInfoServiceImpl implements FileInfoService {
         redisComponent.saveUserSpaceUse(webUserDto.getUserId(), spaceDto);
     }
 
+    /**
+     * 分片文件转存
+     *
+     * @param fileId     文件id
+     * @param webUserDto session中的用户信息
+     */
     public void transferFile(String fileId, SessionWebUserDto webUserDto) {
-        Boolean transferSuccess = true;
+        boolean transferSuccess = true;
         String targetFilePath = null;
         String cover = null;
         FileTypeEnum fileTypeEnum = null;
@@ -367,6 +380,22 @@ public class FileInfoServiceImpl implements FileInfoService {
             //合并文件
             unionFile(fileFolder.getPath(), targetFilePath, fileInfo.getFileName(), true);
             // 视频文件切割
+            fileTypeEnum = FileTypeEnum.getFileTypeBySuffix(fileSuffix);
+            if (FileTypeEnum.VIDEO == fileTypeEnum) {
+                cutFile4Video(fileId, targetFilePath);
+                // 生成缩略图
+                cover = month + "/" + currentUserFolderName + Constants.IMAGE_PNG_SUFFIX;
+                String coverPath = targetFolderName + "/" + cover;
+                ScaleFilter.createCover4Video(new File(targetFilePath), Constants.LENGTH_150, new File(coverPath));
+            } else if (FileTypeEnum.IMAGE == fileTypeEnum) {
+                // 生成缩略图
+                cover = month + "/" + realFileName.replace(".", "_.");
+                String coverPath = targetFolderName + "/" + cover;
+                Boolean created = ScaleFilter.createThumbnailWithFfmpeg(new File(targetFilePath), Constants.LENGTH_150, new File(coverPath), false);
+                if (!created) {
+                    FileUtils.copyFile(new File(targetFilePath), new File(coverPath));
+                }
+            }
         } catch (Exception e) {
             log.error("文件转码失败，文件id：{}，userId:{}", fileId, webUserDto.getUserId(), e);
             transferSuccess = false;
@@ -375,10 +404,18 @@ public class FileInfoServiceImpl implements FileInfoService {
             updateFileInfo.setFileSize(new File(targetFilePath).length());
             updateFileInfo.setFileCover(cover);
             updateFileInfo.setStatus(transferSuccess ? FileStatusEnum.USING.getStatus() : FileStatusEnum.TRANSFER_FAIL.getStatus());
-            fileInfoMapper.updateFileStatusWithOldStatus(fileId,webUserDto.getUserId(),updateFileInfo,FileStatusEnum.TRANSFER.getStatus());
+            fileInfoMapper.updateFileStatusWithOldStatus(fileId, webUserDto.getUserId(), updateFileInfo, FileStatusEnum.TRANSFER.getStatus());
         }
     }
 
+    /**
+     * 合并分片文件方法
+     *
+     * @param dirPath    分片文件目录
+     * @param toFilePath 目标文件目录
+     * @param fileName   文件名
+     * @param delSource  是否删除原文件
+     */
     private void unionFile(String dirPath, String toFilePath, String fileName, Boolean delSource) {
         File dir = new File(dirPath);
         if (!dir.exists()) {
@@ -425,5 +462,32 @@ public class FileInfoServiceImpl implements FileInfoService {
                 }
             }
         }
+    }
+
+    /**
+     * 视频文件切片
+     *
+     * @param fileId        文件id
+     * @param videoFilePath 文件路径
+     */
+    private void cutFile4Video(String fileId, String videoFilePath) {
+        // 创建同名切片目录
+        File tsFolder = new File(videoFilePath.substring(0, videoFilePath.lastIndexOf(".")));
+        if (!tsFolder.exists()) {
+            tsFolder.mkdirs();
+        }
+        final String CMD_TRANSFER_2TS = "ffmpeg -y -i %s -vcode copy -acodec copy -vbsf h264_mp4toannexb %s";
+        final String CMD_CUT_TS = "ffmpeg -i %s -c copy -map 0 -f segment -segment_list %s -segment_time 30 %s/%s_%%4d.ts";
+        String tsPath = tsFolder + "/" + Constants.TS_NAME;
+        // 生成.ts
+        String cmd = String.format(CMD_TRANSFER_2TS, videoFilePath, tsPath);
+        ProcessUtils.executeCommand(cmd, false);
+        // 生成索引文件.m3u8 和切片.ts
+        cmd = String.format(CMD_CUT_TS, tsPath, tsFolder.getPath() + "/" + Constants.M3U8_NAME, tsFolder.getPath(), fileId);
+        ProcessUtils.executeCommand(cmd, false);
+        // 删除index.ts
+        new File(tsPath).delete();
+
+
     }
 }

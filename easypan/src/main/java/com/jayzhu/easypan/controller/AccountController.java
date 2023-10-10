@@ -33,7 +33,7 @@ import java.util.Map;
 
 @RestController("userInfoController")
 @Slf4j
-public class AccountController extends ABaseController{
+public class AccountController extends ABaseController {
 
 
     @Autowired
@@ -128,8 +128,6 @@ public class AccountController extends ABaseController{
             }
             userInfoService.register(email, nickName, password, emailCode);
             return ResponseVO.success(null);
-        } catch (BusinessException e) {
-            throw new RuntimeException(e);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -158,8 +156,6 @@ public class AccountController extends ABaseController{
             SessionWebUserDto sessionWebUserDto = userInfoService.login(email, password);
             session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);
             return ResponseVO.success(sessionWebUserDto);
-        } catch (BusinessException e) {
-            throw new RuntimeException(e);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -189,8 +185,6 @@ public class AccountController extends ABaseController{
             }
             userInfoService.resetPwd(email, password, emailCode);
             return ResponseVO.success();
-        } catch (BusinessException e) {
-            throw new RuntimeException(e);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -287,7 +281,7 @@ public class AccountController extends ABaseController{
     public ResponseVO qqloginCallback(HttpSession session, @VerifyParam(required = true) String code, @VerifyParam(required = true) String state) {
         SessionWebUserDto sessionWebUserDto = userInfoService.qqlogin(code);
 
-        session.setAttribute(Constants.SESSION_KEY,sessionWebUserDto);
+        session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);
         Map<String, Object> result = new HashMap<>();
 
         result.put("callbackUrl", session.getAttribute(state));

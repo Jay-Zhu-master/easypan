@@ -11,6 +11,7 @@ import com.jayzhu.easypan.entity.vo.ResponseVO;
 import com.jayzhu.easypan.entity.enums.FileCategoryEnum;
 import com.jayzhu.easypan.entity.enums.FileDelFlagEnum;
 import com.jayzhu.easypan.service.FileInfoService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/file")
-public class FileInfoController extends ABaseController {
+public class FileInfoController extends CommonFileController {
 
     @Autowired
     FileInfoService fileInfoService;
@@ -58,5 +59,11 @@ public class FileInfoController extends ABaseController {
         SessionWebUserDto webUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
         UploadResultDto resultDto = fileInfoService.uploadFile(webUserDto, fileId, file, fileName, filePid, fileMd5, chunkIndex, chunks);
         return ResponseVO.success(resultDto);
+    }
+
+    @GetMapping("/getImage/{imageFolder}/{imageName}")
+    @GlobalInterceptor
+    public void getImage(HttpServletResponse response, @PathVariable("imageFolder") String imageFolder, @PathVariable("imageName") String imageName) {
+        super.getImage(response, imageFolder, imageName);
     }
 }

@@ -7,6 +7,10 @@ import com.jayzhu.easypan.entity.vo.ResponseVO;
 import com.jayzhu.easypan.utils.CopyTools;
 
 public class ABaseController {
+
+    protected static final String STATUC_SUCCESS = "success";
+
+    protected static final String STATUC_ERROR = "error";
     protected <S, T> PaginationResultVO<T> convert2PaginationVO(PaginationResultVO<S> result, Class<T> tClass) {
         PaginationResultVO<T> resultVO = new PaginationResultVO<>();
         resultVO.setList(CopyTools.copyList(result.getList(), tClass));

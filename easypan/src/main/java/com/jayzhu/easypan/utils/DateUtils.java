@@ -3,6 +3,7 @@ package com.jayzhu.easypan.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class DateUtils {
     }
 
     public static String format(LocalDateTime date, String pattern) {
-        return getSdf(pattern).format(date);
+        return DateTimeFormatter.ofPattern(pattern).format(date);
     }
 
     public static Date parse(String dateStr, String pattern) {

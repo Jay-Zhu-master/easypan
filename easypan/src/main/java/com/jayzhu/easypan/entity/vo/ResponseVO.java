@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResponseVO {
     private Integer code;//响应码，1 代表成功; 0 代表失败
-    private String msg;  //响应信息 描述字符串
+    private String status;  //响应信息 描述字符串
     private String info;
     private Object data; //返回的数据
 
