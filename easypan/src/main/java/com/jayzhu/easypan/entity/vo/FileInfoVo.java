@@ -21,29 +21,30 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FileInfoVo {
     /**
-     * 文件id
+     * 文件ID
      */
     private String fileId;
 
     /**
-     * 父级id
+     * 父级ID
      */
     private String filePid;
 
     /**
-     * 文件大小（字节）
+     * 文件大小
      */
     private Long fileSize;
 
     /**
-     * 文件名
+     * 文件名称
      */
     private String fileName;
 
     /**
-     * 文件封面
+     * 封面
      */
     private String fileCover;
+
     /**
      * 最后更新时间
      */
@@ -52,28 +53,23 @@ public class FileInfoVo {
     private LocalDateTime lastUpdateTime;
 
     /**
-     * 0：文件 1：目录
+     * 0:文件 1:目录
      */
-    private Boolean folderType;
+    private Integer folderType;
 
     /**
-     * 1：视频 2：音频 3：图片 4：pdf 5：doc 6：excel 7：txt 8：code 9：zip 10：其他
+     * 1:视频 2:音频  3:图片 4:文档 5:其他
      */
-    private Boolean fileType;
+    private Integer fileCategory;
 
     /**
-     * 0：转码中 1：转码失败 2：转码成功
+     * 1:视频 2:音频  3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他
      */
-    private Boolean status;
+    private Integer fileType;
 
     /**
-     * 进入回收站时间
+     * 0:转码中 1转码失败 2:转码成功
      */
-    private LocalDateTime recoveryTime;
-
-    /**
-     * 0：删除 1：回收站 2：正常
-     */
-    private Boolean delFlag;
+    private Integer status;
 
 }

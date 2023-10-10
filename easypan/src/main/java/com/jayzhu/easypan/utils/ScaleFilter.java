@@ -35,7 +35,7 @@ public class ScaleFilter {
             if (sorceW <= thumbnailWidth) {
                 return false;
             }
-
+            compressImage(file, thumbnailWidth, targetFile, true);
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -45,7 +45,7 @@ public class ScaleFilter {
 
     public static void compressImage(File sourceFile, Integer width, File targeFile, Boolean delSource) {
         try {
-            String cmd = "ffmpeg -i %s -vf scale=%d:-l %s -y";
+            String cmd = "ffmpeg -i %s -vf scale=%d:-1 %s -y";
             ProcessUtils.executeCommand(String.format(cmd, sourceFile.getAbsoluteFile(), width, targeFile.getAbsoluteFile()), true);
             if (delSource) {
                 FileUtils.forceDelete(sourceFile);
