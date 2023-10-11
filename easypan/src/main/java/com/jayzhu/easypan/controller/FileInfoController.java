@@ -34,10 +34,10 @@ public class FileInfoController extends CommonFileController {
 
     @PostMapping("/loadDataList")
     @GlobalInterceptor
-    public ResponseVO loadDataList(HttpSession session, FileInfoQuery query) {
-        FileCategoryEnum categoryEnum = FileCategoryEnum.getByCode(query.getFileCategory());
+    public ResponseVO loadDataList(HttpSession session, FileInfoQuery query, String category) {
+        FileCategoryEnum categoryEnum = FileCategoryEnum.getByCode(category);
         if (categoryEnum != null) {
-            query.setFileCategory(String.valueOf(categoryEnum.getCategory()));
+            query.setFileCategory(categoryEnum.getCategory());
         }
         query.setUserId(((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY)).getUserId());
         query.setOrderBy("last_update_time desc");

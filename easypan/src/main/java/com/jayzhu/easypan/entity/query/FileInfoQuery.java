@@ -91,7 +91,7 @@ public class FileInfoQuery extends BaseParam {
     /**
      * 1:视频 2:音频  3:图片 4:文档 5:其他
      */
-    private String fileCategory;
+    private Integer fileCategory;
 
     /**
      * 1:视频 2:音频  3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他

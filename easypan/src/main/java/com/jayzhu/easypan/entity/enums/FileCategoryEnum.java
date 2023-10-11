@@ -8,7 +8,7 @@ package com.jayzhu.easypan.entity.enums;
  * @className FileCategoryEnum
  */
 public enum FileCategoryEnum {
-    ALL(0,"all","全部"),
+//    ALL(0,"all","全部"),
     VIDEO(1, "video", "视频"),
     MUSIC(2, "music", "音频"),
     IMAGE(3, "image", "图片"),
