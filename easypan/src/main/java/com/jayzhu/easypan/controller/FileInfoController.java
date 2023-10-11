@@ -42,7 +42,7 @@ public class FileInfoController extends CommonFileController {
         query.setUserId(((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY)).getUserId());
         query.setOrderBy("last_update_time desc");
         query.setDelFlag(FileDelFlagEnum.USING.getFlag());
-        return ResponseVO.success(convert2PaginationVO(fileInfoService.findListByPage(query), FileInfoVo.class));
+        return getSuccessResponseVO(convert2PaginationVO(fileInfoService.findListByPage(query), FileInfoVo.class));
     }
 
     @PostMapping("/uploadFile")
@@ -58,12 +58,27 @@ public class FileInfoController extends CommonFileController {
     ) {
         SessionWebUserDto webUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
         UploadResultDto resultDto = fileInfoService.uploadFile(webUserDto, fileId, file, fileName, filePid, fileMd5, chunkIndex, chunks);
-        return ResponseVO.success(resultDto);
+        return getSuccessResponseVO(resultDto);
     }
 
     @GetMapping("/getImage/{imageFolder}/{imageName}")
     @GlobalInterceptor
     public void getImage(HttpServletResponse response, @PathVariable("imageFolder") String imageFolder, @PathVariable("imageName") String imageName) {
         super.getImage(response, imageFolder, imageName);
+    }
+
+    @GetMapping("/ts/getVideoInfo/{fileId}")
+    @GlobalInterceptor
+    public void getVideoInfo(HttpSession session, HttpServletResponse response, @PathVariable("fileId") String fileId) {
+        SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
+        super.getFile(response, fileId, webUserDto.getUserId());
+    }
+//
+
+    @RequestMapping("/getFile/{fileId}")
+    @GlobalInterceptor
+    public void getFile(HttpSession session, HttpServletResponse response, @PathVariable("fileId") String fileId) {
+        SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
+        super.getFile(response, fileId, webUserDto.getUserId());
     }
 }

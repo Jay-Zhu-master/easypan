@@ -35,7 +35,7 @@ public class ScaleFilter {
             if (sorceW <= thumbnailWidth) {
                 return false;
             }
-            compressImage(file, thumbnailWidth, targetFile, true);
+            compressImage(file, thumbnailWidth, targetFile, delSource);
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());

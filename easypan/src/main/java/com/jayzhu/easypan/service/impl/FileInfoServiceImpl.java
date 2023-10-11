@@ -273,7 +273,7 @@ public class FileInfoServiceImpl implements FileInfoService {
             fileInfo.setFileCategory(fileTypeEnum.getCategory().getCategory());
             fileInfo.setFileType(fileTypeEnum.getType());
             fileInfo.setStatus(FileStatusEnum.TRANSFER.getStatus());
-            fileInfo.setFolderType(FileFolderTypeEnum.FOLDER.getType());
+            fileInfo.setFolderType(FileFolderTypeEnum.FILE.getType());
             fileInfo.setDelFlag(FileDelFlagEnum.USING.getFlag());
             fileInfoMapper.insert(fileInfo);
 

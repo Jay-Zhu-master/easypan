@@ -95,7 +95,7 @@ public class AccountController extends ABaseController {
                 throw new BusinessException("图片验证码不正确");
             }
             emailCodeService.sendEmailCode(email, type);
-            return ResponseVO.success(null);
+            return getSuccessResponseVO(null);
         } catch (BusinessException e) {
             throw new RuntimeException(e);
         } finally {
@@ -127,7 +127,7 @@ public class AccountController extends ABaseController {
                 throw new BusinessException("图片验证码不正确");
             }
             userInfoService.register(email, nickName, password, emailCode);
-            return ResponseVO.success(null);
+            return getSuccessResponseVO(null);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -155,7 +155,7 @@ public class AccountController extends ABaseController {
             }
             SessionWebUserDto sessionWebUserDto = userInfoService.login(email, password);
             session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);
-            return ResponseVO.success(sessionWebUserDto);
+            return getSuccessResponseVO(sessionWebUserDto);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -184,7 +184,7 @@ public class AccountController extends ABaseController {
                 throw new BusinessException("图片验证码不正确");
             }
             userInfoService.resetPwd(email, password, emailCode);
-            return ResponseVO.success();
+            return getSuccessResponseVO(null);
         } finally {
             session.removeAttribute(Constants.CHECK_CODE_KEY);
         }
@@ -213,7 +213,7 @@ public class AccountController extends ABaseController {
     @RequestMapping("/getUserInfo")
     @GlobalInterceptor(checkParams = true)
     public ResponseVO getUserInfo(HttpSession session) {
-        return ResponseVO.success(userInfoService.getUserInfoFromSession(session));
+        return getSuccessResponseVO(userInfoService.getUserInfoFromSession(session));
     }
 
     @RequestMapping("/getUseSpace")
@@ -221,13 +221,13 @@ public class AccountController extends ABaseController {
     public ResponseVO getUseSpace(HttpSession session) {
         SessionWebUserDto sessionWebUserDto = userInfoService.getUserInfoFromSession(session);
         UserSpaceDto spaceDto = redisComponent.getUserSpaceUse(sessionWebUserDto.getUserId());
-        return ResponseVO.success(spaceDto);
+        return getSuccessResponseVO(spaceDto);
     }
 
     @RequestMapping("/logout")
     public ResponseVO logout(HttpSession session) {
         session.invalidate();
-        return ResponseVO.success();
+        return getSuccessResponseVO(null);
     }
 
     @PostMapping("/updateUserAvatar")
@@ -250,7 +250,7 @@ public class AccountController extends ABaseController {
         userInfoService.updateUserInfoByUserId(userInfo, sessionWebUserDto.getUserId());
         sessionWebUserDto.setAvatar(null);
         session.setAttribute(Constants.SESSION_KEY, sessionWebUserDto);
-        return ResponseVO.success();
+        return getSuccessResponseVO(null);
     }
 
     @PostMapping("/updatePassword")
@@ -261,7 +261,7 @@ public class AccountController extends ABaseController {
         UserInfo userInfo = new UserInfo();
         userInfo.setPassword(StringTools.encodeByMd5(password));
         userInfoService.updateUserInfoByUserId(userInfo, sessionWebUserDto.getUserId());
-        return ResponseVO.success();
+        return getSuccessResponseVO(null);
     }
 
 
@@ -273,7 +273,7 @@ public class AccountController extends ABaseController {
             session.setAttribute(state, callbackUrl);
         }
         String url = String.format(appConfig.getQqUrlAuthorization(), appConfig.getQqAppId(), URLEncoder.encode(appConfig.getQqUrlRedirect(), StandardCharsets.UTF_8), state);
-        return ResponseVO.success(url);
+        return getSuccessResponseVO(url);
     }
 
     @PostMapping("/qqlogin/callback")
@@ -286,6 +286,6 @@ public class AccountController extends ABaseController {
 
         result.put("callbackUrl", session.getAttribute(state));
         result.put("userInfo", sessionWebUserDto);
-        return ResponseVO.success(result);
+        return getSuccessResponseVO(result);
     }
 }
