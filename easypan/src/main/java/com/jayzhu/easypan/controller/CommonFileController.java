@@ -3,15 +3,23 @@ package com.jayzhu.easypan.controller;
 import com.jayzhu.easypan.entity.config.AppConfig;
 import com.jayzhu.easypan.entity.constats.Constants;
 import com.jayzhu.easypan.entity.enums.FileCategoryEnum;
+import com.jayzhu.easypan.entity.enums.FileFolderTypeEnum;
 import com.jayzhu.easypan.entity.po.FileInfo;
+import com.jayzhu.easypan.entity.query.FileInfoQuery;
+import com.jayzhu.easypan.entity.vo.FileInfoVo;
+import com.jayzhu.easypan.entity.vo.ResponseVO;
 import com.jayzhu.easypan.service.FileInfoService;
+import com.jayzhu.easypan.utils.CopyTools;
 import com.jayzhu.easypan.utils.FileReaderUtils;
 import com.jayzhu.easypan.utils.StringTools;
+import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.List;
 
 /**
  * @author jayzhu
@@ -66,5 +74,17 @@ public class CommonFileController extends ABaseController {
             }
         }
         FileReaderUtils.readFile(response, filePath);
+    }
+
+    public ResponseVO getFolderInfo(String path, String userId) {
+        String[] pathArray = path.split("/");
+        FileInfoQuery query = new FileInfoQuery();
+        query.setUserId(userId);
+        query.setFolderType(FileFolderTypeEnum.FOLDER.getType());
+        query.setFileIdArray(pathArray);
+        query.setOrderBy("field(file_id,'" + StringUtils.join(pathArray, "','") + "')");
+        List<FileInfo> fileInfoList = fileInfoService.findListByParam(query);
+
+        return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FileInfoVo.class));
     }
 }

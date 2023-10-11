@@ -37,8 +37,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -490,5 +491,125 @@ public class FileInfoServiceImpl implements FileInfoService {
         new File(tsPath).delete();
 
 
+    }
+
+    /**
+     * 新建文件夹
+     *
+     * @param filePid    文件父id
+     * @param userId     用户id
+     * @param folderName 文件夹名称
+     * @return 文件夹信息
+     */
+    public FileInfo newFolder(String filePid, String userId, String folderName) {
+        checkFileName(filePid, userId, folderName, FileFolderTypeEnum.FOLDER.getType());
+        LocalDateTime now = LocalDateTime.now();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileId(StringTools.getRandomString(Constants.LENGTH_10));
+        fileInfo.setUserId(userId);
+        fileInfo.setFilePid(filePid);
+        fileInfo.setFileName(folderName);
+        fileInfo.setFolderType(FileFolderTypeEnum.FOLDER.getType());
+        fileInfo.setCreateTime(now);
+        fileInfo.setLastUpdateTime(now);
+        fileInfo.setStatus(FileStatusEnum.USING.getStatus());
+        fileInfo.setDelFlag(FileDelFlagEnum.USING.getFlag());
+        fileInfoMapper.insert(fileInfo);
+        return fileInfo;
+    }
+
+    /**
+     * 判断文件是否可用
+     *
+     * @param filePid    文件父id
+     * @param userId     用户id
+     * @param fileName   文件名
+     * @param folderType 文件类型 文件/文件夹
+     */
+    private void checkFileName(String filePid, String userId, String fileName, Integer folderType) {
+        FileInfoQuery fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setFolderType(folderType);
+        fileInfoQuery.setFileName(fileName);
+        fileInfoQuery.setFilePid(filePid);
+        fileInfoQuery.setUserId(userId);
+
+        Integer count = fileInfoMapper.selectCount(fileInfoQuery);
+        if (count > 0) {
+            throw new BusinessException("此目录下已经存在同名文件请修改名称");
+        }
+    }
+
+    /**
+     * 文件重命名
+     *
+     * @param fileId   文件id
+     * @param userId   用户id
+     * @param fileName 新文件名
+     * @return 重命名后文件信息
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FileInfo rename(String fileId, String userId, String fileName) {
+        FileInfo fileInfo = fileInfoMapper.selectByFileIdAndUserId(fileId, userId);
+        if (fileInfo == null) {
+            throw new BusinessException("文件不存在");
+        }
+        String filePid = fileInfo.getFilePid();
+        checkFileName(filePid, userId, fileName, fileInfo.getFolderType());
+        if (FileFolderTypeEnum.FILE.getType().equals(fileInfo.getFolderType())) {
+            fileName = fileName + StringTools.getFileSuffix(fileInfo.getFileName());
+        }
+        FileInfo dbInfo = new FileInfo();
+        dbInfo.setFileName(fileName);
+        dbInfo.setLastUpdateTime(LocalDateTime.now());
+        fileInfoMapper.updateByFileIdAndUserId(dbInfo, fileId, userId);
+        FileInfoQuery fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setFilePid(filePid);
+        fileInfoQuery.setUserId(userId);
+        fileInfoQuery.setFileName(fileName);
+        Integer count = fileInfoMapper.selectCount(fileInfoQuery);
+        if (count > 1) {
+            throw new BusinessException("文件名" + fileName + "已存在");
+        }
+        fileInfo.setFileName(fileName);
+        fileInfo.setLastUpdateTime(LocalDateTime.now());
+        return fileInfo;
+    }
+
+    @Override
+    public void changeFileFolder(String[] fileIds, String filePid, String userId) {
+        if (Arrays.toString(fileIds).equals(filePid)) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+        }
+        if (String.valueOf(Constants.ZERO).equals(filePid)) {
+            FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(filePid, userId);
+            if (fileInfo == null || !FileDelFlagEnum.USING.getFlag().equals(fileInfo.getDelFlag())) {
+                throw new BusinessException(ResponseCodeEnum.CODE_600);
+            }
+        }
+
+        FileInfoQuery fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setFilePid(filePid);
+        fileInfoQuery.setUserId(userId);
+        List<FileInfo> dbFileList = fileInfoService.findListByParam(fileInfoQuery);
+        Map<String, FileInfo> dbFileNameMap = dbFileList.stream().collect(Collectors.toMap(FileInfo::getFileName, Function.identity(), (file1, file2) -> file2));
+        // 查询选中文件
+        fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setUserId(userId);
+        fileInfoQuery.setFileIdArray(fileIds);
+        List<FileInfo> selectFileList = fileInfoService.findListByParam(fileInfoQuery);
+
+        // 将所选文件重命名
+        for (FileInfo item : selectFileList) {
+            FileInfo rootFileInfo = dbFileNameMap.get(item.getFileName());
+            // 若文件名已经存在，则重命名被还原的文件名
+            FileInfo updateInfo = new FileInfo();
+            if (rootFileInfo != null) {
+                String fileName = StringTools.rename(item.getFileName());
+                updateInfo.setFileName(fileName);
+            }
+            updateInfo.setFilePid(filePid);
+            this.fileInfoService.updateFileInfoByFileIdAndUserId(updateInfo, item.getFileId(), userId);
+        }
     }
 }

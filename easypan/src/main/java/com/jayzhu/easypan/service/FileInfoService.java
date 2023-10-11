@@ -56,7 +56,7 @@ public interface FileInfoService {
     /**
      * 多条件更新
      */
-    Integer updateByParam(FileInfo bean,FileInfoQuery param);
+    Integer updateByParam(FileInfo bean, FileInfoQuery param);
 
     /**
      * 多条件删除
@@ -66,20 +66,27 @@ public interface FileInfoService {
     /**
      * 根据FileIdAndUserId查询对象
      */
-    FileInfo getFileInfoByFileIdAndUserId(String fileId,String userId);
+    FileInfo getFileInfoByFileIdAndUserId(String fileId, String userId);
 
 
     /**
      * 根据FileIdAndUserId修改
      */
-    Integer updateFileInfoByFileIdAndUserId(FileInfo bean,String fileId,String userId);
+    Integer updateFileInfoByFileIdAndUserId(FileInfo bean, String fileId, String userId);
 
 
     /**
      * 根据FileIdAndUserId删除
      */
-    Integer deleteFileInfoByFileIdAndUserId(String fileId,String userId);
+    Integer deleteFileInfoByFileIdAndUserId(String fileId, String userId);
 
 
     public void transferFile(String fileId, SessionWebUserDto webUserDto);
+
+    FileInfo newFolder(String filePid, String userId, String folderName);
+
+    FileInfo rename(String fileId, String userId, String fileName);
+
+    void changeFileFolder(String[] fileIds,String filePid,String userId);
+
 }
