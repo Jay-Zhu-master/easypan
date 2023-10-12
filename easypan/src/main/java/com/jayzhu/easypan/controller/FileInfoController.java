@@ -15,6 +15,7 @@ import com.jayzhu.easypan.entity.enums.FileDelFlagEnum;
 import com.jayzhu.easypan.service.FileInfoService;
 import com.jayzhu.easypan.utils.CopyTools;
 import com.jayzhu.easypan.utils.StringTools;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +140,31 @@ public class FileInfoController extends CommonFileController {
                                        @RequestParam("filePid") String filePid) {
         SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
         fileInfoService.changeFileFolder(fileIds, filePid, webUserDto.getUserId());
+        return getSuccessResponseVO(null);
+    }
+
+    @RequestMapping("/createDownloadUrl/{fileId}")
+    @GlobalInterceptor
+    public ResponseVO createDownloadUrl(HttpSession session,
+                                        @PathVariable("fileId") String fileId) {
+        SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
+        return super.createDownloadUrl(fileId, webUserDto.getUserId());
+    }
+
+    @RequestMapping("/download/{code}")
+    @GlobalInterceptor(checkLogin = false)
+    public void download(HttpServletRequest request,
+                         HttpServletResponse response,
+                         @PathVariable("code") String code) throws Exception {
+        super.download(request, response, code);
+    }
+
+    @RequestMapping("/delFile")
+    @GlobalInterceptor(checkLogin = false)
+    public ResponseVO download(HttpSession session,
+                               @RequestParam("fileIds") String[] fileIds) throws Exception {
+        SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
+        fileInfoService.removeFile2RecycleBatch(webUserDto.getUserId(), fileIds);
         return getSuccessResponseVO(null);
     }
 }

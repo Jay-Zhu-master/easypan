@@ -87,6 +87,22 @@ public interface FileInfoService {
 
     FileInfo rename(String fileId, String userId, String fileName);
 
-    void changeFileFolder(String[] fileIds,String filePid,String userId);
+    void changeFileFolder(String[] fileIds, String filePid, String userId);
+
+    /**
+     * 删除文件到回收站
+     *
+     * @param userId  用户id
+     * @param fileIds 文件id列表
+     */
+    void removeFile2RecycleBatch(String userId, String[] fileIds);
+
+    /**
+     * 批量从回收站恢复文件
+     *
+     * @param userId  用户id
+     * @param fileIds 文件id列表
+     */
+    void recoveryFileBatch(String userId, String[] fileIds);
 
 }

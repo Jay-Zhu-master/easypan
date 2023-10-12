@@ -8,8 +8,10 @@ public class Constants {
     public static final Integer ZERO = 0;
     public static final String REDIS_KEY_SYS_SETTING = "easypan:syssetting:";
     public static final String REDIS_KEY_USER_SPACE_USE = "easypan:userspaceuse:";
-    public static final String REDIS_KEY_USER_FILE_TEMP_SIZE = "easy:user:file:temp:";
+    public static final String REDIS_KEY_USER_FILE_TEMP_SIZE = "easypan:user:file:temp:";
+    public static final String REDIS_KEY_DOWNLOAD = "easypan:download:";
     public static final Integer REDIS_KEY_EXPIRES_ONE_MIN = 60;
+    public static final Integer REDIS_KEY_EXPIRES_FIVE_MIN = REDIS_KEY_EXPIRES_ONE_MIN * 5;
     public static final Integer REDIS_KEY_EXPIRES_TEN_MIN = REDIS_KEY_EXPIRES_ONE_MIN * 10;
     public static final Integer REDIS_KEY_EXPIRES_ONE_HOUR = REDIS_KEY_EXPIRES_ONE_MIN * 60;
     public static final Integer REDIS_KEY_EXPIRES_DAY = REDIS_KEY_EXPIRES_ONE_MIN * 60 * 24;
@@ -29,4 +31,5 @@ public class Constants {
     public static final String IMAGE_PNG_SUFFIX = ".png";
 
     public static final Integer LENGTH_150 = 150;
+    public static final Integer LENGTH_50 = 50;
 }

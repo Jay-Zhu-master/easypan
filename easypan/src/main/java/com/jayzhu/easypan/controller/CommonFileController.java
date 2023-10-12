@@ -1,24 +1,32 @@
 package com.jayzhu.easypan.controller;
 
+import com.jayzhu.easypan.component.RedisComponent;
 import com.jayzhu.easypan.entity.config.AppConfig;
 import com.jayzhu.easypan.entity.constats.Constants;
+import com.jayzhu.easypan.entity.dto.DownloadFileDto;
 import com.jayzhu.easypan.entity.enums.FileCategoryEnum;
 import com.jayzhu.easypan.entity.enums.FileFolderTypeEnum;
+import com.jayzhu.easypan.entity.enums.ResponseCodeEnum;
 import com.jayzhu.easypan.entity.po.FileInfo;
 import com.jayzhu.easypan.entity.query.FileInfoQuery;
 import com.jayzhu.easypan.entity.vo.FileInfoVo;
 import com.jayzhu.easypan.entity.vo.ResponseVO;
+import com.jayzhu.easypan.exception.BusinessException;
 import com.jayzhu.easypan.service.FileInfoService;
 import com.jayzhu.easypan.utils.CopyTools;
 import com.jayzhu.easypan.utils.FileReaderUtils;
 import com.jayzhu.easypan.utils.StringTools;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -35,6 +43,9 @@ public class CommonFileController extends ABaseController {
 
     @Resource
     private FileInfoService fileInfoService;
+
+    @Resource
+    private RedisComponent redisComponent;
 
     protected void getImage(HttpServletResponse response, String imageFolder, String imageName) {
         if (StringTools.isEmpty(imageFolder) || StringTools.isEmpty(imageName) || !StringTools.pathIsOk(imageFolder) || !StringTools.pathIsOk(imageName)) {
@@ -76,7 +87,7 @@ public class CommonFileController extends ABaseController {
         FileReaderUtils.readFile(response, filePath);
     }
 
-    public ResponseVO getFolderInfo(String path, String userId) {
+    protected ResponseVO getFolderInfo(String path, String userId) {
         String[] pathArray = path.split("/");
         FileInfoQuery query = new FileInfoQuery();
         query.setUserId(userId);
@@ -86,5 +97,36 @@ public class CommonFileController extends ABaseController {
         List<FileInfo> fileInfoList = fileInfoService.findListByParam(query);
 
         return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FileInfoVo.class));
+    }
+
+    protected ResponseVO createDownloadUrl(String fileId, String userId) {
+        FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(fileId, userId);
+        if (fileInfo == null || fileInfo.getFolderType().equals(FileFolderTypeEnum.FOLDER.getType())) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+        }
+        String code = StringTools.getRandomString(Constants.LENGTH_50);
+        DownloadFileDto fileDto = new DownloadFileDto();
+        fileDto.setDownloadCode(code);
+        fileDto.setFilePath(fileInfo.getFilePath());
+        fileDto.setFileName(fileInfo.getFileName());
+        redisComponent.saveDownloadCode(fileDto);
+        return getSuccessResponseVO(code);
+    }
+
+    protected void download(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
+        DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
+        if (downloadFileDto == null) {
+            return;
+        }
+        String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + downloadFileDto.getFilePath();
+        String fileName = downloadFileDto.getFileName();
+        response.setContentType("application/x-msdownload; charset=UTF-8");
+        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0) { //ie浏览器
+            fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        } else {
+            fileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
+        }
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+        FileReaderUtils.readFile(response,filePath);
     }
 }
