@@ -618,7 +618,7 @@ public class FileInfoServiceImpl implements FileInfoService {
         FileInfoQuery query = new FileInfoQuery();
         query.setUserId(userId);
         query.setFileIdArray(fileIds);
-        query.setDelFlag(FileDelFlagEnum.USING.getFlag());
+        query.setDelFlag(FileDelFlagEnum.RECYCLE.getFlag());
         List<FileInfo> fileInfoList = fileInfoMapper.selectList(query);
         if (fileInfoList.isEmpty()) {
             return;

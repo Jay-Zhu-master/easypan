@@ -57,7 +57,7 @@ public class RecycleController extends ABaseController {
     @GlobalInterceptor
     public ResponseVO recoverFile(HttpSession session, @VerifyParam(required = true) String[] fileIds) {
         SessionWebUserDto webUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
-        fileInfoService.removeFile2RecycleBatch(webUserDto.getUserId(), fileIds);
+        fileInfoService.recoveryFileBatch(webUserDto.getUserId(), fileIds);
         return getSuccessResponseVO(null);
     }
 
