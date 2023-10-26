@@ -15,6 +15,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -61,4 +62,12 @@ public class RecycleController extends ABaseController {
         return getSuccessResponseVO(null);
     }
 
+    @RequestMapping("/delFile")
+    @GlobalInterceptor(checkLogin = false)
+    public ResponseVO delFile(HttpSession session,
+                               @RequestParam("fileIds") String[] fileIds) throws Exception {
+        SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
+        fileInfoService.delFileBatch(webUserDto.getUserId(), fileIds, false);
+        return getSuccessResponseVO(null);
+    }
 }

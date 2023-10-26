@@ -161,7 +161,7 @@ public class FileInfoController extends CommonFileController {
 
     @RequestMapping("/delFile")
     @GlobalInterceptor(checkLogin = false)
-    public ResponseVO download(HttpSession session,
+    public ResponseVO delFile(HttpSession session,
                                @RequestParam("fileIds") String[] fileIds) throws Exception {
         SessionWebUserDto webUserDto = ((SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY));
         fileInfoService.removeFile2RecycleBatch(webUserDto.getUserId(), fileIds);

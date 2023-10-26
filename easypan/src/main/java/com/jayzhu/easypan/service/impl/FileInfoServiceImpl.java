@@ -8,6 +8,7 @@ import com.jayzhu.easypan.entity.dto.UploadResultDto;
 import com.jayzhu.easypan.entity.dto.UserSpaceDto;
 import com.jayzhu.easypan.entity.enums.*;
 import com.jayzhu.easypan.entity.po.FileInfo;
+import com.jayzhu.easypan.entity.po.UserInfo;
 import com.jayzhu.easypan.entity.query.FileInfoQuery;
 import com.jayzhu.easypan.entity.query.SimplePage;
 import com.jayzhu.easypan.entity.vo.PaginationResultVO;
@@ -532,7 +533,7 @@ public class FileInfoServiceImpl implements FileInfoService {
         fileInfoQuery.setFileName(fileName);
         fileInfoQuery.setFilePid(filePid);
         fileInfoQuery.setUserId(userId);
-
+        fileInfoQuery.setDelFlag(FileDelFlagEnum.USING.getFlag());
         Integer count = fileInfoMapper.selectCount(fileInfoQuery);
         if (count > 0) {
             throw new BusinessException("此目录下已经存在同名文件请修改名称");
@@ -567,6 +568,7 @@ public class FileInfoServiceImpl implements FileInfoService {
         fileInfoQuery.setFilePid(filePid);
         fileInfoQuery.setUserId(userId);
         fileInfoQuery.setFileName(fileName);
+        fileInfoQuery.setDelFlag(FileDelFlagEnum.USING.getFlag());
         Integer count = fileInfoMapper.selectCount(fileInfoQuery);
         if (count > 1) {
             throw new BusinessException("文件名" + fileName + "已存在");
@@ -618,7 +620,7 @@ public class FileInfoServiceImpl implements FileInfoService {
         FileInfoQuery query = new FileInfoQuery();
         query.setUserId(userId);
         query.setFileIdArray(fileIds);
-        query.setDelFlag(FileDelFlagEnum.RECYCLE.getFlag());
+        query.setDelFlag(FileDelFlagEnum.USING.getFlag());
         List<FileInfo> fileInfoList = fileInfoMapper.selectList(query);
         if (fileInfoList.isEmpty()) {
             return;
@@ -700,6 +702,84 @@ public class FileInfoServiceImpl implements FileInfoService {
                 FileInfo updateInfo = new FileInfo();
                 updateInfo.setFileName(fileName);
                 fileInfoMapper.updateByFileIdAndUserId(updateInfo, item.getFileId(), userId);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delFileBatch(String userId, String[] fileIds, Boolean adminOp) {
+        try {
+            FileInfoQuery query = new FileInfoQuery();
+            query.setUserId(userId);
+            query.setFileIdArray(fileIds);
+            query.setDelFlag(FileDelFlagEnum.RECYCLE.getFlag());
+            List<FileInfo> fileInfoList = fileInfoMapper.selectList(query);
+            List<String> delFileSubFileFolderFileIdList = new ArrayList<>();
+            // 找到所选文件子目录文件id
+            for (FileInfo fileInfo : fileInfoList) {
+                if (FileFolderTypeEnum.FOLDER.getType().equals(fileInfo.getFolderType())) {
+                    findAllSubFolderFileList(delFileSubFileFolderFileIdList, userId, fileInfo.getFileId(), FileDelFlagEnum.DEL.getFlag());
+                }
+            }
+            // 删除所选文件子目录中的文件
+            if (!delFileSubFileFolderFileIdList.isEmpty()) {
+                fileInfoMapper.delFileBatch(userId, delFileSubFileFolderFileIdList, null, adminOp ? null : FileDelFlagEnum.DEL.getFlag());
+            }
+            // 删除所选文件
+            fileInfoMapper.delFileBatch(userId, null, Arrays.asList(fileIds), adminOp ? null : FileDelFlagEnum.RECYCLE.getFlag());
+//            delRealFile(userId, delFileSubFileFolderFileIdList, Arrays.asList(fileIds));
+            // 退回用户空间
+            Long useSpace = fileInfoMapper.selectUseSpace(userId);
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUseSpace(useSpace);
+            userInfoMapper.updateByUserId(userInfo, userId);
+            // 更新缓存
+            UserSpaceDto userSpaceDto = redisComponent.getUserSpaceUse(userId);
+            userSpaceDto.setUseSpace(useSpace);
+            redisComponent.saveUserSpaceUse(userId, userSpaceDto);
+        } catch (Exception e) {
+            log.error("文件删除失败", e);
+            throw new BusinessException("文件删除失败");
+        }
+    }
+
+    private void delRealFile(String userId, List<String> delFileSubFileFolderFileIdList, List<String> fileIds) throws IOException {
+//        fileIds.addAll(delFileSubFileFolderFileIdList);
+        FileInfoQuery query = new FileInfoQuery();
+        query.setFilePidArray(delFileSubFileFolderFileIdList.toArray(new String[delFileSubFileFolderFileIdList.size()]));
+//        query.setFolderType(FileFolderTypeEnum.FILE.getType());
+        query.setUserId(userId);
+        List<FileInfo> fileInfoList = fileInfoMapper.selectList(query);
+        fileInfoList.forEach(fileInfo -> {
+            fileIds.add(fileInfo.getFileId());
+        });
+        query = new FileInfoQuery();
+        query.setUserId(userId);
+        query.setFileIdArray(((String[]) fileIds.toArray()));
+        fileInfoList = fileInfoMapper.selectList(query);
+        for (FileInfo fileInfo : fileInfoList) {
+            if (fileInfo.getFileType().equals(FileTypeEnum.IMAGE.getType())) {
+                String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileInfo.getFilePath();
+                String compressImagePath = StringTools.getFileNameNoSuffix(filePath) + "_" + Constants.IMAGE_PNG_SUFFIX;
+                File file = new File(filePath);
+                FileUtils.forceDelete(file);
+                file = new File(compressImagePath);
+                FileUtils.forceDelete(file);
+            } else if (fileInfo.getFileType().equals(FileTypeEnum.VIDEO.getType())) {
+                String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileInfo.getFilePath();
+                String compressImagePath = StringTools.getFileNameNoSuffix(filePath) + Constants.IMAGE_PNG_SUFFIX;
+                String tsFilePath = StringTools.getFileNameNoSuffix(filePath);
+                File file = new File(filePath);
+                FileUtils.forceDelete(file);
+                file = new File(compressImagePath);
+                FileUtils.forceDelete(file);
+                file = new File(tsFilePath);
+                FileUtils.forceDelete(file);
+            } else {
+                String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileInfo.getFilePath();
+                File file = new File(filePath);
+                FileUtils.forceDelete(file);
             }
         }
     }

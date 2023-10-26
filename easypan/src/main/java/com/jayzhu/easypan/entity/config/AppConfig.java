@@ -1,9 +1,11 @@
 package com.jayzhu.easypan.entity.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Getter
 public class AppConfig {
     @Value("${spring.mail.username}")
     private String sendUsername;
@@ -25,45 +27,4 @@ public class AppConfig {
     private String qqUrlUserInfo;
     @Value("${qq.url.redirect}")
     private String qqUrlRedirect;
-
-    public String getQqAppId() {
-        return qqAppId;
-    }
-
-    public String getQqAppKey() {
-        return qqAppKey;
-    }
-
-    public String getQqUrlAccessToken() {
-        return qqUrlAccessToken;
-    }
-
-    public String getQqUrlOpenId() {
-        return qqUrlOpenId;
-    }
-
-    public String getQqUrlUserInfo() {
-        return qqUrlUserInfo;
-    }
-
-    public String getQqUrlRedirect() {
-        return qqUrlRedirect;
-    }
-
-    public String getQqUrlAuthorization() {
-        return qqUrlAuthorization;
-    }
-
-    public String getProjectFolder() {
-        return projectFolder;
-    }
-
-    public String getAdminEmails() {
-        return adminEmails;
-    }
-
-    public String getSendUsername() {
-        return sendUsername;
-    }
-
 }

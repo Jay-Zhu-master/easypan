@@ -105,4 +105,6 @@ public interface FileInfoService {
      */
     void recoveryFileBatch(String userId, String[] fileIds);
 
+    void delFileBatch(String userId,String[] fileIds,Boolean adminOp);
+
 }
